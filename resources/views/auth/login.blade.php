@@ -10,6 +10,12 @@
                 {!!session('password_recover')!!}
             </div>
         @endif
+        @foreach ($errors->all() as $error)
+        <div class="alert alert-danger">
+            <button type="button" class="close" data-dismiss="alert">×</button>
+            {{ $error }}
+        </div>
+        @endforeach
         @csrf
         <div class="control-group">
             <div class="email controls">
