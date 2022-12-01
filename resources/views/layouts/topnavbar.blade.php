@@ -1,6 +1,6 @@
 <div id="navigation">
     <div class="container-fluid">
-    <a href="{{route('history.index')}}" id="brand">CRM System</a>
+    <a href="{{route('history.index')}}" id="brand">CRM System PRO</a>
         <a href="#" class="toggle-nav" rel="tooltip" data-placement="bottom" title="Toggle navigation"><i class="icon-reorder"></i></a>
 
         <div class="user">

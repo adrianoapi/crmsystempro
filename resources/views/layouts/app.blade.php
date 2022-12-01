@@ -72,6 +72,7 @@
 
 
             <!-- Top Bar -->
+            <body class="theme-satgreen">
             @include('layouts.topnavbar')
 
 

@@ -53,9 +53,9 @@
 
 </head>
 
-<body class='login'>
+<body class='theme-satgreen login'>
 	<div class="wrapper">
-		<h1><a href="javascript:void(0)"><img src="{!! asset('crm.png') !!}" class='retina-ready' width="59" height="49">CRM SYTEM</a></h1>
+		<h1><a href="javascript:void(0)"><img src="{!! asset('crm.png') !!}" class='retina-ready' width="59" height="49">CRM SYTEM PRO</a></h1>
 		<div class="login-body">
             @yield('content')
 		</div>
