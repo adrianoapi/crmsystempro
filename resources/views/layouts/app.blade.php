@@ -72,7 +72,7 @@
 
 
             <!-- Top Bar -->
-            <body class="theme-satgreen">
+            <body class="theme-magenta">
             @include('layouts.topnavbar')
 
 
