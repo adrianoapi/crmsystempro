@@ -153,3 +153,8 @@ Route::prefix('importacao')->group(function(){
 
     Route::delete('destroy/{queued}', 'QueuedController@destroy')->name('importacao.destroy');
 });
+Route::prefix('reset')->group(function(){
+    Route::get('/',  'ResetController@db' )->name('reset.db');
+});
+
+
