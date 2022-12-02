@@ -55,7 +55,7 @@
 
 <body class='theme-magenta login'>
 	<div class="wrapper">
-		<h1><a href="javascript:void(0)">CRM SYTEM PRO</a></h1>
+		<h1><a href="javascript:void(0)">CRM SYSTEM PRO</a></h1>
 		<div class="login-body">
             @yield('content')
 		</div>
