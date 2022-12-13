@@ -38,6 +38,7 @@ class QueuedController extends Controller
 
         $queued = Queued::where('module', $modulo)->where('process', false)->get();
 
+
         return view('queueds.index', [
             'title' => $tile,
             'queueds' => $queued,
@@ -75,6 +76,12 @@ class QueuedController extends Controller
                     $student->telefone_com = $value->students->telefone_com;
                     $student->celular      = $value->students->celular;
                     $student->name         = $value->students->name;
+                    $student->email        = $value->students->email;
+                    $student->cep          = $value->students->cep;
+                    $student->endereco     = $value->students->endereco;
+                    $student->bairro       = $value->students->bairro;
+                    $student->cidade       = $value->students->cidade;
+                    $student->estado       = $value->students->estado;
 
                     if($student->save())
                     {
@@ -216,7 +223,10 @@ class QueuedController extends Controller
         if(strpos($value, ",") !== false){
             $arrMed  = explode(",", $value);
             $number = preg_replace('/[^0-9]/', '', $arrMed[0]).".".$arrMed[1];
-        } else{
+        } elseif(strpos($value, ".") !== false){
+            // Quando o csv já vem formatado em decilam x.xx
+            $number = $value;
+        }else{
             $number = preg_replace('/[^0-9]/', '', $value).".00";
         }
         return $number;
@@ -240,43 +250,62 @@ class QueuedController extends Controller
         }
 
         $handle  = fopen($_FILES['filename']['tmp_name'], "r");
-        $headers = fgetcsv($handle, 1000, ",");
+        $linhas  = 0;
 
         if($modulo == 'contrato')
         {
-            while (($data = fgetcsv($handle, 1000, ",")) !== FALSE)
-            {
-
-                $row = explode(';', $data[0]);
-
-                if(!empty($row[7]))
+            while (($data = fgetcsv($handle, 20000, ",")) !== FALSE)
+            { 
+                if($linhas)
                 {
-                    $arrayBody[] = [
-                        'students' => [
-                            'cod_unidade' => $this->autoComplete($row[0],3),
-                            'cod_curso' => $this->autoComplete($row[1], 3),
-                            'ctr' => $this->autoComplete($row[2], 5),
-                            'cpf_cnpj' => preg_replace("/[^0-9]/", "",$row[3]),
-                            'telefone' => $row[4],
-                            'telefone_com' => $row[5],
-                            'celular' => $row[6],
-                            'name' => utf8_encode($row[7]),
-                        ],
-                        'defaultings' => [
-                            'fase' => $row[8],
-                            'dt_inadimplencia' => $this->setDate($row[9]),
-                            'm_parcela_pg' => !empty($row[10]) ? $row[10] : "0",
-                            'm_parcelas' => !empty($row[11]) ? $row[11] : "0",
-                            'm_parcela_valor' => !empty($row[12]) ? $this->tratarValorMoeda($row[12]) : "0",
-                            's_parcela_pg' => !empty($row[13]) ? $row[13] : "0",
-                            's_parcelas' => !empty($row[14]) ? $row[14] : "0",
-                            's_parcela_valor' => !empty($row[15]) ? $this->tratarValorMoeda($row[15]) : "0",
-                            'multa' => $row[16],
-                        ]
+                    $row = explode(';', $data[0]);
+                   
 
-                    ];
+                    if(!empty($row[13]))
+                    {
+                        if(!array_key_exists(22, $row)){
+                            echo "Algum campo está com valor incorreto, o que acarretou na quebra da importação:".
+                            "<ul>".
+                            "<li>Campo moeda deve ser valor decimal sem vírgula, exp: 000.00</li>".
+                            "<li>Não pode ter vírgula no nome, endereço ou qualquer outro campo</li>".
+                            "</ul>";
+                            
+                            dd($row[13]);
+                        }
+                        $arrayBody[] = [
+                            'students' => [
+                                'cod_unidade' => $this->autoComplete($row[0],3),
+                                'cod_curso' => $this->autoComplete($row[1], 3),
+                                'ctr' => $this->autoComplete($row[2], 5),
+                                'cpf_cnpj' => preg_replace("/[^0-9]/", "",$row[3]),
+                                'telefone' => $row[4],
+                                'telefone_com' => $row[5],
+                                'celular' => $row[6],
+                                'email' => $row[7],
+                                'cep' => $row[8],
+                                'endereco' => $row[9],
+                                'bairro' => $row[10],
+                                'cidade' => $row[11],
+                                'estado' => $row[12],
+                                'name' => $row[13],
+                            ],
+                            'defaultings' => [
+                                'fase' => $row[14],
+                                'dt_inadimplencia' => $this->setDate($row[15]),
+                                'm_parcela_pg' => !empty($row[16]) ? $row[16] : "0",
+                                'm_parcelas' => !empty($row[17]) ? $row[17] : "0",
+                                'm_parcela_valor' => !empty($row[18]) ? $this->tratarValorMoeda($row[18]) : "0",
+                                's_parcela_pg' => !empty($row[19]) ? $row[19] : "0",
+                                's_parcelas' => !empty($row[20]) ? $row[20] : "0",
+                                's_parcela_valor' => !empty($row[21]) ? $this->tratarValorMoeda($row[21]) : "0",
+                                'multa' => $row[22],
+                            ]
+
+                        ];
+                    }
                 }
-
+                $linhas++;
+                
             }
         }
 
@@ -369,11 +398,16 @@ class QueuedController extends Controller
         }
 
         fclose($handle);
+        
 
         $model = new Queued();
         $model->user_id = Auth::id();
         $model->module  = $modulo;
-        $model->body    = json_encode($arrayBody);
+        if($modulo == 'contrato'){
+            $model->body    = $this->alternativeArray2Json($arrayBody);
+        }else{
+            $model->body    = json_decode($arrayBody);
+        }
 
         if(empty($model->body))
         {
@@ -430,6 +464,60 @@ class QueuedController extends Controller
         }
 
         return $label;
+    }
+
+    public function alternativeArray2Json(array $data)
+    {
+        $json = "[";
+
+        $i = 0;
+        foreach($data as $key => $value):
+
+            $virgulaUm = $i > 0 ? "," : "";
+            $json .= $virgulaUm."{";
+
+            #students
+            $iS=0;
+            $json .= "\"students\":{";
+            foreach($value['students'] as $keyS => $student):
+
+                $virgulaDois = $iS > 0 ? "," : "";
+                $json .= "{$virgulaDois}";
+                $json .= "\"{$keyS}\":\"".$student."\"";
+                $iS++;
+
+                
+            endforeach;
+            $json .= "},"; # fecha students
+
+            #defaultings
+            $iD=0;
+            $json .= "\"defaultings\":{";
+            foreach($value['defaultings'] as $keyD => $default):
+
+                $virgulaTres = $iD > 0 ? "," : "";
+                $json .= "{$virgulaTres}";
+                $json .= "\"{$keyD}\":\"{$default}\"";
+                $iD++;
+
+                
+            endforeach;
+            $json .= "}"; # fecha defaultings
+          
+            $i++;
+            /*if($i > 500)
+            {
+                break;
+            }*/
+        
+            $json .= "}"; # fecha o objeto
+
+        endforeach; // primeiro foreach
+
+
+        $json .= "]";
+
+        return $json;
     }
 
     /**

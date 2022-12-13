@@ -74,6 +74,12 @@
                                                 <strong>ctr:</strong> {{$value->students->ctr}}<br>
                                                 <strong>cpf/cnpj:</strong> {{$value->students->cpf_cnpj}}<br>
                                                 <strong>telefones:</strong> [{{$value->students->telefone}}] [{{$value->students->telefone_com}}] [{{$value->students->celular}}]<br>
+                                                <strong>cep:</strong> {{$value->students->cep}}<br>
+                                                <strong>endereço:</strong> {{$value->students->endereco}}<br>
+                                                <strong>bairro:</strong> {{$value->students->bairro}}<br>
+                                                <strong>cidade:</strong> {{$value->students->cidade}}<br>
+                                                <strong>estado:</strong> {{$value->students->estado}}<br>
+                                                <strong>email:</strong> {{$value->students->email}}<br>
                                             </td>
                                             <td style="vertical-align: top">
                                                 <strong>fase:</strong> {{$value->defaultings->fase}}<br>
