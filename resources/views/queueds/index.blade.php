@@ -57,6 +57,10 @@
                             </span>
                         </div>
 
+                        @if($modulo == 'contrato')
+                            @include('tutorial.importar.contrato')
+                        @endif
+
                         <div class="box-content nopadding">
                             <table class="table table-nomargin table-bordered">
                                 <thead>
